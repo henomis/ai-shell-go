@@ -90,6 +90,13 @@ func (s *Shell) Retry(previousCommand string) (*ShellResponse, error) {
 
 func (s *Shell) Execute(command string) error {
 
+	color.New(color.FgCyan).DisableColor()
+
+	shell := os.Getenv("SHELL")
+	if shell != "" {
+		command = fmt.Sprintf("%s -c '%s'", shell, command)
+	}
+
 	c := cmd.NewCommand(command, cmd.WithStandardStreams, cmd.WithInheritedEnvironment(cmd.EnvVars{}))
 
 	err := c.Execute()

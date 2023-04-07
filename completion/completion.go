@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"os"
 	"regexp"
 	"strings"
 
@@ -30,7 +31,7 @@ const (
 	{{ .explain }}
 	`
 
-	promptDeteails = `Please only reply with the single line bash command surrounded by 3 backticks. It should be able to be directly run in a bash terminal. Do not include any other text.`
+	promptDeteails = `Please only reply with the single line bash command surrounded by squared brackets. It should be able to be directly run in a bash terminal. Do not include any other text.`
 
 	promptExplain = `Then please describe the bash script in plain english, step by step, what exactly it does.
   Please describe succintly, use as few words as possible, do not be verbose. 
@@ -38,7 +39,7 @@ const (
 `
 )
 
-var openAIResponseRegex = regexp.MustCompile("```(.*?)```\\s*(.*)")
+var openAIResponseRegex = regexp.MustCompile("\\[(.*?)\\]\\s*(.*)")
 
 type Completion struct {
 	openAIClient *openai.Client
@@ -92,6 +93,7 @@ func (c *Completion) Suggest(input, previousStep string) (*CompletionResponse, e
 	matches := openAIResponseRegex.FindStringSubmatch(content)
 
 	if matches == nil || len(matches) < 3 {
+		fmt.Fprintf(os.Stderr, "🤖 OOPS!\n%s\n\n", content)
 		return nil, fmt.Errorf("no command found")
 	}
 
