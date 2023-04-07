@@ -38,11 +38,11 @@ $ ai-shell-go print first 3 lines of each file in a directory
 ### Output
 
 ```
-Here is your command line:
+    🤖 Here is your command line:
 
-$ head -n 3 *
---
-This command uses the `head` utility to print the first 3 lines of each file in the current directory (`*` is a wildcard that matches all files in the directory). The `-n 3` flag specifies that it should print only the first 3 lines.
+    $ head -n 3 *
+    --
+    This command uses the `head` utility to print the first 3 lines of each file in the current directory (`*` is a wildcard that matches all files in the directory). The `-n 3` flag specifies that it should print only the first 3 lines.
 
-[E]xecute, [R]evise, [Q]uit? > 
+    [E]xecute, [R]evise, [Q]uit? > 
 ```

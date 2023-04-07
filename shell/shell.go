@@ -46,9 +46,9 @@ func (s *Shell) Suggest(input string) (*ShellResponse, error) {
 		return nil, fmt.Errorf("completion: %w", err)
 	}
 
-	color.New(color.FgWhite, color.Bold).Printf("\nHere is your command line:\n\n")
+	color.New(color.FgWhite, color.Bold).Printf("\n🤖 Here is your command line:\n\n")
 	color.New(color.FgCyan, color.Bold).Printf("$ %s\n", response.Command)
-	color.New(color.FgWhite).Printf("--\n%s\n\n", response.Explain)
+	color.New(color.FgWhite, color.Italic).Printf("--\n%s\n\n", response.Explain)
 
 	userAction := getUserActionFromStdin()
 
@@ -66,7 +66,7 @@ func (s *Shell) Retry(previousCommand string) (*ShellResponse, error) {
 	}
 	var userAction string
 
-	color.New(color.FgWhite, color.Bold).Printf("\nEnter your revision:\n\n")
+	color.New(color.FgWhite, color.Bold).Printf("\n🤖 Enter your revision:\n\n")
 	reader := bufio.NewReader(os.Stdin)
 	userAction, _ = reader.ReadString('\n')
 
@@ -75,9 +75,9 @@ func (s *Shell) Retry(previousCommand string) (*ShellResponse, error) {
 		return nil, fmt.Errorf("completion: %w", err)
 	}
 
-	color.New(color.FgWhite, color.Bold).Printf("\nHere is your command line:\n\n")
+	color.New(color.FgWhite, color.Bold).Printf("\n🤖 Here is your command line:\n\n")
 	color.New(color.FgCyan, color.Bold).Printf("$ %s\n", response.Command)
-	color.New(color.FgWhite).Printf("--\n%s\n\n", response.Explain)
+	color.New(color.FgWhite, color.Italic).Printf("--\n%s\n\n", response.Explain)
 
 	userAction = getUserActionFromStdin()
 
