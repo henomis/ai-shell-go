@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"html/template"
-	"os"
 	"regexp"
 	"strings"
 
@@ -93,7 +92,7 @@ func (c *Completion) Suggest(input, previousStep string) (*CompletionResponse, e
 	matches := openAIResponseRegex.FindStringSubmatch(content)
 
 	if matches == nil || len(matches) < 3 {
-		fmt.Fprintf(os.Stderr, "🤖 OOPS!\n%s\n\n", content)
+		//fmt.Fprintf(os.Stderr, "🤖 OOPS!\n%s\n\n", content)
 		return nil, fmt.Errorf("no command found")
 	}
 

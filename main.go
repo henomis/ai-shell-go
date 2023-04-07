@@ -7,37 +7,36 @@ import (
 
 	openai "github.com/sashabaranov/go-openai"
 
-	"github.com/henomis/ai-shell-go/completion"
-	"github.com/henomis/ai-shell-go/shell"
+	"github.com/henomis/ai-shell-go/internal/pkg/completion"
+	"github.com/henomis/ai-shell-go/internal/pkg/shell"
 )
 
 var (
-	ErrorShellAI = fmt.Errorf("something went wrong")
+	ErrorShellAI = fmt.Errorf("🤖 OOPS! ")
 )
 
 func main() {
 
 	openAIKey := os.Getenv("OPENAI_API_KEY")
 	if openAIKey == "" {
-		fmt.Println("OPEN_AI_KEY is not set.")
-		fmt.Println("Please set the OPENAI_API_KEY environment variable to your OpenAI API key.")
+		fmt.Printf("%s: OPEN_AI_KEY is not set. Please set the OPENAI_API_KEY environment variable to your OpenAI API key\n", ErrorShellAI)
 		return
 	}
 
 	userInput := strings.Join(os.Args[1:], " ")
 
-	client := openai.NewClient(openAIKey)
-	completion := completion.New(client)
-	s := shell.New(completion)
+	openAIClient := openai.NewClient(openAIKey)
+	completionInstance := completion.New(openAIClient)
+	shellInstance := shell.New(completionInstance)
 
-	shellResponse, err := s.Suggest(userInput)
+	shellResponse, err := shellInstance.Suggest(userInput, "")
 	if err != nil {
 		fmt.Printf("%s: %s\n", ErrorShellAI, err)
 		return
 	}
 
 	for shellResponse.CommandAction == shell.CommandActionRevise {
-		shellResponse, err = s.Retry(shellResponse.Command)
+		shellResponse, err = shellInstance.Suggest("", shellResponse.Command)
 		if err != nil {
 			fmt.Printf("%s: %s\n", ErrorShellAI, err)
 			return
@@ -45,7 +44,7 @@ func main() {
 	}
 
 	if shellResponse.CommandAction == shell.CommandActionExecute {
-		err = s.Execute(shellResponse.Command)
+		err = shellInstance.Execute(shellResponse.Command)
 		if err != nil {
 			fmt.Printf("%s: %s\n", ErrorShellAI, err)
 			return
