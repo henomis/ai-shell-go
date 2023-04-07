@@ -12,6 +12,10 @@ Be sure to have a working Go environment, then clone the repository and run the 
 $ go get -u github.com/henomis/ai-shell-go
 ```
 
+## Pre-built binaries
+
+Pre-built binaries are available for Linux and macOS on the [releases page](https://github.com/henomis/ai-shell-go/releases/latest).
+
 ## Usage
 
 ```
