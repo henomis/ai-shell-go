@@ -1,4 +1,4 @@
-# ai-shell-go
+# 🤖 ai-shell-go
 
 [![Build Status](https://github.com/henomis/ai-shell-go/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/henomis/ai-shell-go/actions/workflows/release.yml?query=branch%3Amain) [![GoDoc](https://godoc.org/github.com/henomis/ai-shell-go?status.svg)](https://godoc.org/github.com/henomis/ai-shell-go) [![Go Report Card](https://goreportcard.com/badge/github.com/henomis/ai-shell-go)](https://goreportcard.com/report/github.com/henomis/ai-shell-go) [![GitHub release](https://img.shields.io/github/release/henomis/ai-shell-go.svg)](https://github.com/henomis/ai-shell-go/releases)
 
