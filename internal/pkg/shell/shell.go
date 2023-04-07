@@ -33,6 +33,7 @@ var (
 	yellow = color.New(color.FgYellow).SprintFunc()
 	green  = color.New(color.FgGreen).SprintFunc()
 	red    = color.New(color.FgRed).SprintFunc()
+	white  = color.New(color.FgWhite).SprintFunc()
 )
 
 func New(completion *completion.Completion) *Shell {
@@ -110,7 +111,10 @@ func getUserPromptFromStdin() string {
 func getUserActionFromStdin() string {
 
 	color.NoColor = false
-	fmt.Printf("[%s]xecute, [%s]evise, [%s]uit? > ", green("E"), yellow("R"), red("Q"))
+	fmt.Printf("%s%s%s%s%s%s%s",
+		white("["), green("E"), white("]xecute, ["), yellow("R"), white("]evise, ["), red("Q"), white("]uit> "),
+	)
+
 	color.NoColor = true
 
 	reader := bufio.NewReader(os.Stdin)
