@@ -28,11 +28,14 @@ Pre-built binaries are available for Linux and macOS on the [releases page](http
 
 ## Usage
 
+⚠️ ai-go-shell requires an OpenAI API key as `OPENAI_API_KEY` environment variable.
+
+
 ```
 $ ai-shell-go print first 3 lines of each file in a directory
 ```
 
-## Output
+### Output
 
 ```
 Here is your command line:
