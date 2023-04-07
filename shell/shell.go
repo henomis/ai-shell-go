@@ -1,7 +1,9 @@
 package shell
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/commander-cli/cmd"
@@ -14,12 +16,17 @@ type Shell struct {
 	completion *completion.Completion
 }
 
-type executeResponse string
+type ShellResponse struct {
+	CommandAction CommandAction
+	Command       string
+}
+
+type CommandAction string
 
 const (
-	executeResponseExecute executeResponse = "e"
-	executeResponseRetry   executeResponse = "r"
-	executeResponseExit    executeResponse = "q"
+	CommandActionExecute CommandAction = "execute"
+	CommandActionRevise  CommandAction = "retry"
+	CommandActionExit    CommandAction = "exit"
 )
 
 func New(completion *completion.Completion) *Shell {
@@ -28,50 +35,101 @@ func New(completion *completion.Completion) *Shell {
 	}
 }
 
-func (s *Shell) Run(input string) error {
+func (s *Shell) Suggest(input string) (*ShellResponse, error) {
 
 	if input == "" {
-		return fmt.Errorf("input is empty")
+		return nil, fmt.Errorf("input is empty")
 	}
 
-	for {
-		executeResponse, command := s.suggest(input)
-		if executeResponse == executeResponseExit {
-			c := cmd.NewCommand(command)
-			err := c.Execute()
-			if err != nil {
-				return fmt.Errorf("command: %w", err)
-			}
-			break
-		}
+	response, err := s.completion.Suggest(input, "")
+	if err != nil {
+		return nil, fmt.Errorf("completion: %w", err)
+	}
 
+	color.New(color.FgWhite, color.Bold).Printf("\nHere is your command line:\n\n")
+	color.New(color.FgCyan, color.Bold).Printf("$ %s\n", response.Command)
+	color.New(color.FgWhite).Printf("--\n%s\n\n", response.Explain)
+
+	userAction := getUserActionFromStdin()
+
+	return &ShellResponse{
+		Command:       response.Command,
+		CommandAction: getCommandActionFromUserAction(userAction),
+	}, nil
+
+}
+
+func (s *Shell) Retry(previousCommand string) (*ShellResponse, error) {
+
+	if previousCommand == "" {
+		return nil, fmt.Errorf("command is empty")
+	}
+	var userAction string
+
+	color.New(color.FgWhite, color.Bold).Printf("\nEnter your revision:\n\n")
+	reader := bufio.NewReader(os.Stdin)
+	userAction, _ = reader.ReadString('\n')
+
+	response, err := s.completion.Suggest(userAction, previousCommand)
+	if err != nil {
+		return nil, fmt.Errorf("completion: %w", err)
+	}
+
+	color.New(color.FgWhite, color.Bold).Printf("\nHere is your command line:\n\n")
+	color.New(color.FgCyan, color.Bold).Printf("$ %s\n", response.Command)
+	color.New(color.FgWhite).Printf("--\n%s\n\n", response.Explain)
+
+	userAction = getUserActionFromStdin()
+
+	return &ShellResponse{
+		Command:       response.Command,
+		CommandAction: getCommandActionFromUserAction(userAction),
+	}, nil
+
+}
+
+func (s *Shell) Execute(command string) error {
+
+	c := cmd.NewCommand(command, cmd.WithStandardStreams, cmd.WithInheritedEnvironment(cmd.EnvVars{}))
+
+	err := c.Execute()
+	if err != nil {
+		return fmt.Errorf("command: %w", err)
 	}
 
 	return nil
 }
 
-func (s *Shell) suggest(input string) (executeResponse, string) {
-	response, err := s.completion.Suggest(input)
-	if err != nil {
-		return executeResponseExit, ""
-	}
+// ---------------
+// support methods
+// ---------------
 
-	color.New(color.FgCyan, color.Bold).Printf("$ %s\n", response.Command)
-	color.New(color.FgWhite).Printf("--\n%s", response.Explain)
+func getUserActionFromStdin() string {
 
-	var userInput string
-	fmt.Println("[E]xecute, [R]etry, [Q]uit? > ")
-	fmt.Scanf("%s", &userInput)
+	var userAction string
+	color.New(color.FgWhite).Printf("[")
+	color.New(color.FgGreen).Printf("E")
+	color.New(color.FgWhite).Printf("]xecute, [")
+	color.New(color.FgYellow).Printf("R")
+	color.New(color.FgWhite).Printf("]evise, [")
+	color.New(color.FgRed).Printf("Q")
+	color.New(color.FgWhite).Printf("]uit? > ")
+	reader := bufio.NewReader(os.Stdin)
+	userAction, _ = reader.ReadString('\n')
+	userAction = strings.TrimSpace(userAction)
 
-	switch strings.ToLower(userInput) {
+	return userAction
+}
+
+func getCommandActionFromUserAction(userAction string) CommandAction {
+	switch strings.ToLower(userAction) {
 	case "e":
-		return executeResponseExecute, response.Command
+		return CommandActionExecute
 	case "r":
-		return executeResponseRetry, response.Command
+		return CommandActionRevise
 	case "q":
-		return executeResponseExit, response.Command
+		return CommandActionExit
 	default:
-		return executeResponseExit, response.Command
+		return CommandActionExit
 	}
-
 }

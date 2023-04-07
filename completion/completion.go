@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	promptTemplate = `I will give you a prompt to create a single line bash command that one can enter in a terminal and run, based on what is asked in the prompt.
+	generatePromptTemplate = `I will give you a prompt to create a single line bash command that one can enter in a terminal and run, based on what is asked in the prompt.
 
     {{ .details }}
 
@@ -20,9 +20,19 @@ const (
 
     The prompt is: {{ .prompt }}`
 
-	details = `Please only reply with the single line bash command surrounded by 3 backticks. It should be able to be directly run in a bash terminal. Do not include any other text.`
+	regeneratePromptTemplate = `Please update the following bash script based on what is asked in the following prompt.
+    
+	The script: {{ .command }}    
+	The prompt: {{ .prompt }}
 
-	explain = `Then please describe the bash script in plain english, step by step, what exactly it does.
+    {{ .details }}
+	
+	{{ .explain }}
+	`
+
+	promptDeteails = `Please only reply with the single line bash command surrounded by 3 backticks. It should be able to be directly run in a bash terminal. Do not include any other text.`
+
+	promptExplain = `Then please describe the bash script in plain english, step by step, what exactly it does.
   Please describe succintly, use as few words as possible, do not be verbose. 
   If there are multiple steps, please display them as a list.
 `
@@ -45,12 +55,17 @@ func New(openAIClient *openai.Client) *Completion {
 	}
 }
 
-func (c *Completion) Suggest(input string) (*CompletionResponse, error) {
+func (c *Completion) Suggest(input, previousStep string) (*CompletionResponse, error) {
 	if input == "" {
 		return nil, fmt.Errorf("input is empty")
 	}
 
-	prompt := buildPrompt(details, explain, input)
+	var prompt string
+	if previousStep == "" {
+		prompt = buildGenerationPrompt(input)
+	} else {
+		prompt = buildRenerationPrompt(input, previousStep)
+	}
 
 	response, err := c.openAIClient.CreateChatCompletion(
 		context.Background(),
@@ -94,18 +109,44 @@ func (c *Completion) Suggest(input string) (*CompletionResponse, error) {
 // support methods
 // ---------------
 
-func buildPrompt(details, explain, prompt string) string {
+func buildGenerationPrompt(prompt string) string {
 	var output bytes.Buffer
 
-	templ := template.Must(template.New("prompt").Parse(promptTemplate))
+	templ := template.Must(template.New("prompt").Parse(generatePromptTemplate))
 	err := templ.Execute(&output, map[string]interface{}{
-		"details": details,
-		"explain": explain,
+		"details": promptDeteails,
+		"explain": promptExplain,
 		"prompt":  prompt,
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	return output.String()
+	return removeInitialSpaces(output.String())
+}
+
+func buildRenerationPrompt(prompt, command string) string {
+	var output bytes.Buffer
+
+	templ := template.Must(template.New("prompt").Parse(regeneratePromptTemplate))
+	err := templ.Execute(&output, map[string]interface{}{
+		"details": promptDeteails,
+		"explain": promptExplain,
+		"prompt":  prompt,
+		"command": command,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return removeInitialSpaces(output.String())
+}
+
+func removeInitialSpaces(input string) string {
+	lines := strings.Split(input, "\n")
+	for i, line := range lines {
+		lines[i] = strings.TrimLeft(line, " ")
+		lines[i] = strings.TrimLeft(lines[i], "\t")
+	}
+	return strings.Join(lines, "\n")
 }
