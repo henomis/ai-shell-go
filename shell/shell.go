@@ -67,6 +67,7 @@ func (s *Shell) Retry(previousCommand string) (*ShellResponse, error) {
 	var userAction string
 
 	color.New(color.FgWhite, color.Bold).Printf("\n🤖 Enter your revision:\n\n")
+	color.New(color.FgCyan).DisableColor()
 	reader := bufio.NewReader(os.Stdin)
 	userAction, _ = reader.ReadString('\n')
 
@@ -121,6 +122,7 @@ func getUserActionFromStdin() string {
 	color.New(color.FgWhite).Printf("]evise, [")
 	color.New(color.FgRed).Printf("Q")
 	color.New(color.FgWhite).Printf("]uit? > ")
+	color.New(color.FgCyan).DisableColor()
 	reader := bufio.NewReader(os.Stdin)
 	userAction, _ = reader.ReadString('\n')
 	userAction = strings.TrimSpace(userAction)
