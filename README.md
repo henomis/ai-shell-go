@@ -5,6 +5,10 @@
 This is a simple AI shell helper written in GO. It uses OpenAI API to generate a plausible shell command from a given prompt.
 As soon as the command is generated, the user can choose to execute it or revise it adding more context.
 
+
+
+![ai-shell-go](screen.gif)
+
 ## Installation
 Be sure to have a working Go environment, then run the following command:
 
